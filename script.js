@@ -1,163 +1,105 @@
-// Основные переменные
+// Основные переменные и константы
 let currentTheme = 'light';
-let soundEnabled = true;
-let gameActive = false;
-let gameTime = 60;
-let gameTimer;
-let foundPhosphates = 0;
-let totalPhosphates = 5;
-let gameScore = 0;
-let currentCase = 0;
+let currentQuestion = 0;
 let quizScore = 0;
-let moleculeRotation = 0;
-let moleculeZoom = 1;
-
-// Данные для игры
-const products = [
-    { name: "Порошок 'Чистота'", icon: "🧼", phosphate: true, ingredients: ["Фосфаты", "ПАВ", "Ароматизаторы"] },
-    { name: "Мыло детское", icon: "🧴", phosphate: false, ingredients: ["Глицерин", "Масла", "Экстракты"] },
-    { name: "Средство для посуды 'Блеск'", icon: "🍽️", phosphate: true, ingredients: ["Фосфаты", "SLS", "Консерванты"] },
-    { name: "Гель для стирки 'Свежесть'", icon: "👕", phosphate: true, ingredients: ["Фосфаты", "Энзимы", "Отбеливатель"] },
-    { name: "Ополаскиватель 'Нежность'", icon: "🌸", phosphate: false, ingredients: ["Кондиционер", "Эфирные масла"] },
-    { name: "Пятновыводитель 'Сила'", icon: "🔴", phosphate: true, ingredients: ["Фосфаты", "Пероксид", "ПАВ"] },
-    { name: "Мыло хозяйственное", icon: "🧽", phosphate: false, ingredients: ["Жиры", "Щёлочь", "Вода"] },
-    { name: "Средство для ванной", icon: "🛁", phosphate: true, ingredients: ["Фосфаты", "Хлор", "ПАВ"] },
-    { name: "Шампунь детский", icon: "👶", phosphate: false, ingredients: ["Пантенол", "Ромашка", "Без SLS"] },
-    { name: "Кондиционер для белья", icon: "👚", phosphate: false, ingredients: ["Аромамасла", "Смягчитель"] },
-    { name: "Отбеливатель 'Белизна'", icon: "⚪", phosphate: false, ingredients: ["Перкарбонат", "Активатор"] },
-    { name: "Средство для окон", icon: "🪟", phosphate: false, ingredients: ["Спирт", "Аммиак", "Вода"] }
-];
+let toxicityLevel = 30;
+let rinseLevel = 50;
 
 // Данные для викторины
-const quizCases = [
+const quizData = [
     {
-        number: 1,
-        question: "После стирки новым порошком у ребёнка появилась сыпь. В составе обнаружены фосфаты. Ваши действия?",
+        question: "Что такое фосфаты в бытовой химии?",
         options: [
-            "Продолжить использование, это аллергия на ткань",
-            "Сменить порошок на бесфосфатный",
-            "Уменьшить дозу порошка вдвое",
-            "Добавить больше кондиционера"
+            "Питательные вещества для растений",
+            "Соли фосфорной кислоты, смягчающие воду",
+            "Натуральные эфирные масла",
+            "Витаминные добавки для белья"
         ],
-        correct: 1,
-        evidence: "Фосфаты разрушают защитный барьер кожи, особенно у детей."
+        correct: 1
     },
     {
-        number: 2,
-        question: "На этикетке средства для посуды указано: 'Sodium Phosphate'. Что это значит?",
+        question: "Какой процент стиральных порошков содержит фосфаты?",
         options: [
-            "Натуральный экстракт",
-            "Безопасная пищевая добавка",
-            "Фосфатное соединение",
-            "Витамин для очистки"
+            "10-20%",
+            "30-40%",
+            "50-60%",
+            "70-80%"
         ],
-        correct: 2,
-        evidence: "Sodium Phosphate — фосфат натрия, относится к фосфатным соединениям."
+        correct: 3
     },
     {
-        number: 3,
-        question: "Пруд возле дачи зацвёл зелёным цветом. Возможная причина?",
+        question: "Как фосфаты влияют на кожу человека?",
         options: [
-            "Жаркая погода",
-            "Сброс фосфатных удобрений",
-            "Размножение лягушек",
-            "Естественный процесс"
+            "Увлажняют и питают",
+            "Вызывают сухость и аллергию",
+            "Защищают от солнца",
+            "Не оказывают никакого влияния"
         ],
-        correct: 1,
-        evidence: "Фосфаты из удобрений вызывают эвтрофикацию — цветение водоёмов."
+        correct: 1
     },
     {
-        number: 4,
-        question: "Какой знак искать на упаковке, чтобы избежать фосфатов?",
+        question: "Что такое эвтрофикация водоёмов?",
         options: [
-            "ECOCERT или Листок жизни",
-            "Знак ISO",
-            "Штрих-код",
-            "Знак переработки"
+            "Очищение воды",
+            "Цветение водорослей из-за избытка фосфатов",
+            "Образование льда",
+            "Естественное старение озера"
         ],
-        correct: 0,
-        evidence: "ECOCERT и 'Листок жизни' гарантируют отсутствие фосфатов."
+        correct: 1
     },
     {
-        number: 5,
-        question: "Безопасная домашняя замена стирального порошка?",
+        question: "Какой знак гарантирует отсутствие фосфатов?",
         options: [
-            "Хозяйственное мыло + сода",
-            "Отбеливатель + кондиционер",
-            "Шампунь + ополаскиватель",
-            "Уксус + соль"
+            "ISO 9001",
+            "ECOCERT",
+            "CE mark",
+            "FCC"
         ],
-        correct: 0,
-        evidence: "Хоз. мыло и сода эффективно очищают без вреда для здоровья."
+        correct: 1
     }
 ];
 
-// Альтернативы фосфатным средствам
-const alternatives = [
-    "Стиральный порошок без фосфатов",
-    "Эко-гель для посуды",
-    "Мыльные орехи для стирки",
-    "Сода + уксус для уборки",
-    "Горчичный порошок для посуды",
-    "Энзимные пятновыводители"
+// Сообщения для результатов теста
+const resultMessages = [
+    { min: 0, max: 2, message: "Нужно больше изучать тему! Перечитай материал ещё раз." },
+    { min: 3, max: 3, message: "Неплохо! Но есть куда расти. Обрати внимание на вопросы с ошибками." },
+    { min: 4, max: 4, message: "Отлично! Ты хорошо разбираешься в теме фосфатов." },
+    { min: 5, max: 5, message: "Превосходно! Ты настоящий эксперт по экологической безопасности!" }
 ];
 
-// Ждём полной загрузки страницы
+// Инициализация при полной загрузке страницы
 window.addEventListener('load', function() {
-    console.log('Страница полностью загружена!');
+    console.log('Страница полностью загружена');
     initAll();
 });
 
-// Инициализация всего
+// Основная функция инициализации
 function initAll() {
-    console.log('Инициализация начата...');
-    
-    // Проверяем существование элементов перед инициализацией
-    if (!checkRequiredElements()) {
-        console.error('Не все элементы найдены!');
-        return;
-    }
+    console.log('Инициализация начата');
     
     initTheme();
-    initSound();
-    initHouseInteraction();
-    initSkinSlider();
-    initGame();
+    initAnimations();
     initQuiz();
+    initSliders();
+    initButtons();
     initChecklist();
-    initEventListeners();
-    animateStats();
-    initScheme();
+    initParallax();
+    initScrollAnimations();
     
-    console.log('Инициализация завершена успешно!');
-}
-
-// Проверка необходимых элементов
-function checkRequiredElements() {
-    const requiredIds = [
-        'themeToggle', 'soundToggle', 'startInvestigation',
-        'stat1', 'stat2', 'stat3', 'skinSlider', 'skinValue',
-        'startGame', 'gameTimer', 'gameFound', 'gameScore',
-        'playScheme'
-    ];
-    
-    let allFound = true;
-    requiredIds.forEach(id => {
-        if (!document.getElementById(id)) {
-            console.warn('Элемент не найден:', id);
-            allFound = false;
-        }
-    });
-    
-    return allFound;
+    console.log('Инициализация завершена');
 }
 
 // Инициализация темы
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
+    // Проверяем сохранённую тему
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        currentTheme = savedTheme;
+        setTheme(savedTheme);
+    }
     
-    const themeBtn = document.getElementById('themeToggle');
+    // Обработчик кнопки темы
+    const themeBtn = document.getElementById('themeBtn');
     if (themeBtn) {
         themeBtn.addEventListener('click', function() {
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -170,702 +112,594 @@ function initTheme() {
 
 function setTheme(theme) {
     currentTheme = theme;
-    document.body.className = theme === 'dark' ? 'dark-theme' : '';
-    const icon = document.querySelector('#themeToggle i');
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    
+    const icon = document.querySelector('#themeBtn i');
     if (icon) {
         icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
+    
+    // Анимация перехода
+    document.body.style.transition = 'all 0.5s ease';
+    setTimeout(() => {
+        document.body.style.transition = '';
+    }, 500);
 }
 
-// Управление звуком
-function initSound() {
-    const savedSound = localStorage.getItem('sound') || 'enabled';
-    soundEnabled = savedSound === 'enabled';
-    updateSoundIcon();
+// Инициализация анимаций
+function initAnimations() {
+    // Анимация молекулы
+    const atoms = document.querySelectorAll('.atom');
+    atoms.forEach((atom, index) => {
+        atom.style.animationDelay = `${index * 0.5}s`;
+    });
     
-    const soundBtn = document.getElementById('soundToggle');
-    if (soundBtn) {
-        soundBtn.addEventListener('click', function() {
-            soundEnabled = !soundEnabled;
-            localStorage.setItem('sound', soundEnabled ? 'enabled' : 'disabled');
-            updateSoundIcon();
+    // Анимация статистики
+    const stats = document.querySelectorAll('.stat-value');
+    stats.forEach(stat => {
+        const value = parseInt(stat.textContent);
+        stat.textContent = '0';
+        animateCounter(stat, 0, value, 2000);
+    });
+    
+    // Анимация токсичности
+    updateToxicity();
+    
+    // Анимация водорослей и рыб
+    const algae = document.querySelector('.algae');
+    const fish = document.querySelector('.fish');
+    
+    if (algae) {
+        setInterval(() => {
+            algae.style.transform = `scale(${1 + Math.random() * 0.3})`;
+        }, 2000);
+    }
+    
+    if (fish) {
+        setInterval(() => {
+            fish.style.transform = `translateX(${Math.random() * 10 - 5}px)`;
+        }, 1500);
+    }
+}
+
+// Анимация счёта
+function animateCounter(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const current = Math.floor(progress * (end - start) + start);
+        element.textContent = current + (element.classList.contains('stat-value') ? '%' : '');
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Обновление уровня токсичности
+function updateToxicity() {
+    const fill = document.getElementById('toxicityFill');
+    if (fill) {
+        fill.style.width = `${toxicityLevel}%`;
+        
+        // Меняем цвет в зависимости от уровня
+        if (toxicityLevel > 70) {
+            fill.style.background = 'linear-gradient(90deg, var(--primary), var(--danger))';
+        } else if (toxicityLevel > 40) {
+            fill.style.background = 'linear-gradient(90deg, var(--primary), var(--warning))';
+        } else {
+            fill.style.background = 'linear-gradient(90deg, var(--primary), var(--secondary))';
+        }
+    }
+}
+
+// Инициализация слайдеров
+function initSliders() {
+    const toxicitySlider = document.getElementById('toxicitySlider');
+    const rinseSlider = document.getElementById('rinseSlider');
+    const rinseValue = document.getElementById('rinseValue');
+    
+    if (rinseSlider && rinseValue) {
+        rinseSlider.addEventListener('input', function() {
+            rinseLevel = this.value;
+            rinseValue.textContent = rinseLevel + '%';
+            
+            // Анимация изменения
+            rinseValue.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                rinseValue.style.transform = 'scale(1)';
+            }, 200);
+            
+            // Эффект для демонстрации
+            const water = document.querySelector('.clean-water');
+            if (water) {
+                const opacity = 0.3 + (rinseLevel / 100) * 0.7;
+                water.style.opacity = opacity.toString();
+            }
+        });
+    }
+    
+    // Автоматическое изменение токсичности
+    setInterval(() => {
+        toxicityLevel = 30 + Math.sin(Date.now() / 5000) * 20;
+        updateToxicity();
+    }, 100);
+}
+
+// Инициализация кнопок
+function initButtons() {
+    // Кнопка начала
+    const startBtn = document.getElementById('startBtn');
+    if (startBtn) {
+        startBtn.addEventListener('click', function() {
+            const aboutSection = document.getElementById('about');
+            if (aboutSection) {
+                aboutSection.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            animateButton(this);
             playSound('click');
         });
     }
-}
-
-function updateSoundIcon() {
-    const icon = document.querySelector('#soundToggle i');
-    if (icon) {
-        icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+    
+    // Кнопка проверки этикетки
+    const checkLabelBtn = document.getElementById('checkLabel');
+    if (checkLabelBtn) {
+        checkLabelBtn.addEventListener('click', function() {
+            showLabelScanner();
+            animateButton(this);
+            playSound('click');
+        });
     }
+    
+    // Кнопка рецептов
+    const recipeBtn = document.getElementById('showRecipe');
+    if (recipeBtn) {
+        recipeBtn.addEventListener('click', function() {
+            showRecipes();
+            animateButton(this);
+            playSound('click');
+        });
+    }
+    
+    // Кнопка печати
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            printChecklist();
+            animateButton(this);
+            playSound('click');
+        });
+    }
+    
+    // Закрытие модального окна
+    const closeModalBtn = document.querySelector('.close-modal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
+            closeModal();
+            playSound('click');
+        });
+    }
+    
+    // Закрытие по клику вне модального окна
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('recipeModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
 }
 
+// Анимация кнопки
+function animateButton(button) {
+    button.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        button.style.transform = '';
+    }, 150);
+}
+
+// Воспроизведение звука
 function playSound(type) {
-    if (!soundEnabled) return;
+    // В реальном проекте здесь был бы звуковой файл
     console.log('Воспроизведение звука:', type);
 }
 
-// Анимация статистики
-function animateStats() {
-    animateCounter('stat1', 0, 78, 2000, '%');
-    animateCounter('stat2', 0, 34, 2500, '%');
-    animateCounter('stat3', 0, 65, 3000, '%');
-}
-
-function animateCounter(elementId, start, end, duration, suffix = '') {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-    
-    let startTime = null;
-    const step = (end - start) / (duration / 16); // 60 FPS
-    
-    function updateCounter(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
+// Сканер этикетки
+function showLabelScanner() {
+    const ingredients = document.querySelector('.ingredients');
+    if (ingredients) {
+        // Подсвечиваем опасные ингредиенты
+        const badIngredients = ingredients.querySelectorAll('.bad');
         
-        if (elapsed < duration) {
-            const current = Math.min(start + (elapsed / duration) * (end - start), end);
-            element.textContent = Math.floor(current) + suffix;
-            requestAnimationFrame(updateCounter);
-        } else {
-            element.textContent = end + suffix;
-        }
-    }
-    
-    requestAnimationFrame(updateCounter);
-}
-
-// Взаимодействие с домом
-function initHouseInteraction() {
-    const rooms = document.querySelectorAll('.room');
-    
-    rooms.forEach(room => {
-        room.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.1)';
-            animateDots(this);
+        badIngredients.forEach(ingredient => {
+            ingredient.style.animation = 'badPulse 0.5s ease 3';
+            ingredient.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
+            
+            setTimeout(() => {
+                ingredient.style.boxShadow = '';
+            }, 1500);
         });
         
-        room.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-        
-        room.addEventListener('click', function() {
-            const roomType = this.classList.contains('bathroom') ? 'ванной' :
-                           this.classList.contains('kitchen') ? 'кухни' : 'спальни';
-            alert(`🔍 Проверьте средства в ${roomType} на содержание фосфатов!`);
-            playSound('click');
-        });
-    });
-}
-
-function animateDots(roomElement) {
-    const dots = roomElement.querySelectorAll('.dot');
-    dots.forEach((dot, index) => {
-        dot.style.animationDelay = `${index * 0.2}s`;
-    });
-}
-
-// Слайдер кожи
-function initSkinSlider() {
-    const slider = document.getElementById('skinSlider');
-    const valueDisplay = document.getElementById('skinValue');
-    const damagedSkin = document.querySelector('.damaged');
-    
-    if (slider && valueDisplay && damagedSkin) {
-        slider.addEventListener('input', function() {
-            const value = this.value;
-            valueDisplay.textContent = value + '%';
-            
-            // Анимация повреждения кожи
-            const damagePercent = value + '%';
-            damagedSkin.style.clipPath = `polygon(0 0, ${damagePercent} 0, ${damagePercent} 100%, 0% 100%)`;
-            
-            // Цвет текста в зависимости от значения
-            if (value > 70) {
-                valueDisplay.style.color = '#ef4444';
-            } else if (value > 30) {
-                valueDisplay.style.color = '#f59e0b';
-            } else {
-                valueDisplay.style.color = '#10b981';
-            }
-        });
+        // Показываем предупреждение
+        setTimeout(() => {
+            alert('⚠️ ВНИМАНИЕ!\n\nОбнаружены опасные компоненты:\n- Фосфаты\n- Sodium phosphate\n\nРекомендуем выбрать средство без этих ингредиентов.');
+        }, 800);
     }
 }
 
-// Игра "Найди фосфаты"
-function initGame() {
-    const startBtn = document.getElementById('startGame');
-    const resetBtn = document.getElementById('resetGame');
-    const downloadBtn = document.getElementById('downloadChecklist');
-    
-    if (startBtn) {
-        startBtn.addEventListener('click', startGame);
+// Показать рецепты
+function showRecipes() {
+    const modal = document.getElementById('recipeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
-    
-    if (resetBtn) {
-        resetBtn.addEventListener('click', resetGame);
-    }
-    
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', downloadChecklist);
-    }
-    
-    generateProducts();
 }
 
-function generateProducts() {
-    const shelf = document.getElementById('shelf');
-    if (!shelf) return;
-    
-    shelf.innerHTML = '';
-    
-    // Перемешиваем продукты
-    const shuffledProducts = [...products].sort(() => Math.random() - 0.5).slice(0, 8);
-    
-    shuffledProducts.forEach((product, index) => {
-        const productElement = document.createElement('div');
-        productElement.className = `product ${product.phosphate ? 'danger' : 'safe'}`;
-        productElement.dataset.phosphate = product.phosphate;
-        productElement.innerHTML = `
-            <div class="product-icon">${product.icon}</div>
-            <div class="product-name">${product.name}</div>
-            <div class="product-ingredients">${product.ingredients.join(', ')}</div>
-        `;
-        
-        productElement.addEventListener('click', function() {
-            if (!gameActive) return;
-            
-            const hasPhosphate = this.dataset.phosphate === 'true';
-            
-            if (hasPhosphate) {
-                if (!this.classList.contains('selected')) {
-                    this.classList.add('selected');
-                    foundPhosphates++;
-                    gameScore += 100;
-                    updateGameStats();
-                    playSound('success');
-                    
-                    if (foundPhosphates === totalPhosphates) {
-                        endGame(true);
-                    }
-                }
-            } else {
-                this.style.borderColor = '#ef4444';
-                gameScore = Math.max(0, gameScore - 50);
-                updateGameStats();
-                playSound('error');
+// Закрыть модальное окно
+function closeModal() {
+    const modal = document.getElementById('recipeModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+// Инициализация чек-листа
+function initChecklist() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const label = this.nextElementSibling;
+            if (this.checked) {
+                label.style.textDecoration = 'line-through';
+                label.style.opacity = '0.7';
+                label.style.color = 'var(--primary)';
                 
+                // Анимация галочки
+                this.parentElement.style.transform = 'translateX(10px)';
                 setTimeout(() => {
-                    this.style.borderColor = '';
-                }, 500);
+                    this.parentElement.style.transform = '';
+                }, 300);
+            } else {
+                label.style.textDecoration = '';
+                label.style.opacity = '';
+                label.style.color = '';
             }
         });
-        
-        shelf.appendChild(productElement);
     });
 }
 
-function startGame() {
-    if (gameActive) return;
-    
-    gameActive = true;
-    gameTime = 60;
-    foundPhosphates = 0;
-    gameScore = 0;
-    totalPhosphates = document.querySelectorAll('.product.danger').length;
-    
-    const startBtn = document.getElementById('startGame');
-    const results = document.getElementById('gameResults');
-    
-    if (startBtn) startBtn.disabled = true;
-    if (results) results.style.display = 'none';
-    
-    // Сброс всех продуктов
-    document.querySelectorAll('.product').forEach(product => {
-        product.classList.remove('selected');
-        product.style.borderColor = '';
-    });
-    
-    updateGameStats();
-    
-    // Таймер
-    gameTimer = setInterval(() => {
-        gameTime--;
-        updateGameStats();
-        
-        if (gameTime <= 0) {
-            endGame(false);
-        }
-    }, 1000);
-    
-    playSound('click');
-}
-
-function resetGame() {
-    clearInterval(gameTimer);
-    gameActive = false;
-    
-    const startBtn = document.getElementById('startGame');
-    if (startBtn) startBtn.disabled = false;
-    
-    generateProducts();
-    updateGameStats();
-    
-    const results = document.getElementById('gameResults');
-    if (results) results.style.display = 'none';
-    
-    playSound('click');
-}
-
-function updateGameStats() {
-    const timerEl = document.getElementById('gameTimer');
-    const foundEl = document.getElementById('gameFound');
-    const scoreEl = document.getElementById('gameScore');
-    
-    if (timerEl) timerEl.textContent = gameTime;
-    if (foundEl) foundEl.textContent = `${foundPhosphates}/${totalPhosphates}`;
-    if (scoreEl) scoreEl.textContent = gameScore;
-}
-
-function endGame(won) {
-    clearInterval(gameTimer);
-    gameActive = false;
-    
-    const startBtn = document.getElementById('startGame');
-    const results = document.getElementById('gameResults');
-    const message = document.getElementById('gameMessage');
-    const alternativesList = document.getElementById('alternativesList');
-    
-    if (startBtn) startBtn.disabled = false;
-    
-    if (results) {
-        results.style.display = 'block';
-        
-        if (won) {
-            if (message) {
-                message.textContent = `Поздравляем! Вы нашли все фосфаты за ${60 - gameTime} секунд!`;
-                message.style.color = '#10b981';
-            }
-            playSound('success');
-        } else {
-            if (message) {
-                message.textContent = `Время вышло! Вы нашли ${foundPhosphates} из ${totalPhosphates} фосфатов.`;
-                message.style.color = '#ef4444';
-            }
-            playSound('error');
-        }
-        
-        // Показываем альтернативы
-        if (alternativesList) {
-            alternativesList.innerHTML = '';
-            alternatives.forEach(alt => {
-                const li = document.createElement('li');
-                li.textContent = alt;
-                alternativesList.appendChild(li);
-            });
-        }
-    }
-}
-
-function downloadChecklist() {
+// Печать чек-листа
+function printChecklist() {
     const checklistContent = `
-ЧЕК-ЛИСТ БЕЗОПАСНОСТИ ОТ ФОСФАТОВ
-==================================
-
-1. ПРОВЕРЬТЕ СРЕДСТВА:
-- Стиральные порошки
-- Средства для посуды
-- Чистящие средства
-
-2. ЧИТАЙТЕ СОСТАВ:
-Избегайте: Фосфаты, Sodium Phosphate, Potassium Phosphate
-
-3. ВЫБРАЙТЕ ЗНАКИ:
-✅ ECOCERT
-✅ EU Ecolabel
-✅ Листок жизни
-
-4. БЕЗОПАСНЫЕ АЛЬТЕРНАТИВЫ:
-${alternatives.join('\n')}
-
-Сгенерировано на сайте "Фосфаты: невидимая угроза"
-${new Date().toLocaleDateString()}
+        ===================================
+        ЧЕК-ЛИСТ БЕЗОПАСНОСТИ ОТ ФОСФАТОВ
+        ===================================
+        
+        [ ] 1. Проверить все стиральные порошки в доме
+        [ ] 2. Заменить средство для посуды на бесфосфатное
+        [ ] 3. Купить перчатки для уборки
+        [ ] 4. Рассказать семье о вреде фосфатов
+        
+        ===================================
+        РЕКОМЕНДАЦИИ:
+        - Читайте состав средств
+        - Выбирайте эко-сертификаты
+        - Используйте натуральные средства
+        - Тщательно полоскайте
+        
+        Сгенерировано: ${new Date().toLocaleDateString()}
     `;
     
-    const blob = new Blob([checklistContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'чеклист-без-фосфатов.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    playSound('click');
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Чек-лист безопасности от фосфатов</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        padding: 20px;
+                        line-height: 1.6;
+                    }
+                    h1 {
+                        color: #10b981;
+                        text-align: center;
+                    }
+                    .checklist {
+                        background: #f9fafb;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                    }
+                    .tip {
+                        background: #fef3c7;
+                        padding: 15px;
+                        border-radius: 5px;
+                        margin-top: 20px;
+                        font-style: italic;
+                    }
+                    @media print {
+                        body { padding: 0; }
+                        button { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Чек-лист безопасности от фосфатов</h1>
+                <div class="checklist">
+                    <pre>${checklistContent}</pre>
+                </div>
+                <div class="tip">
+                    <strong>Совет:</strong> Распечатайте этот чек-лист и повесьте на холодильник!
+                </div>
+                <button onclick="window.print()">🖨️ Печать</button>
+                <button onclick="window.close()">❌ Закрыть</button>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
 }
 
-// Викторина
+// Инициализация викторины
 function initQuiz() {
-    const submitBtn = document.getElementById('submitAnswer');
-    const retryBtn = document.getElementById('retryQuiz');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const retryBtn = document.getElementById('retryBtn');
     
-    if (submitBtn) submitBtn.addEventListener('click', checkAnswer);
+    if (nextBtn) nextBtn.addEventListener('click', nextQuestion);
+    if (prevBtn) prevBtn.addEventListener('click', prevQuestion);
+    if (submitBtn) submitBtn.addEventListener('click', submitQuiz);
     if (retryBtn) retryBtn.addEventListener('click', resetQuiz);
     
-    displayCase();
+    displayQuestion();
 }
 
-function displayCase() {
-    if (currentCase >= quizCases.length) {
-        showQuizResults();
-        return;
+// Отображение вопроса
+function displayQuestion() {
+    const questionData = quizData[currentQuestion];
+    if (!questionData) return;
+    
+    // Обновляем прогресс
+    updateProgress();
+    
+    // Отображаем вопрос
+    const questionElement = document.getElementById('quizQuestion');
+    if (questionElement) {
+        questionElement.textContent = questionData.question;
+        questionElement.style.animation = 'fadeIn 0.5s ease';
     }
     
-    const caseData = quizCases[currentCase];
-    
-    const caseNumber = document.getElementById('caseNumber');
-    const caseQuestion = document.getElementById('caseQuestion');
-    const caseEvidence = document.getElementById('caseEvidence');
-    const caseOptions = document.getElementById('caseOptions');
-    const quizCase = document.getElementById('quizCase');
-    const quizResults = document.getElementById('quizResults');
-    
-    if (caseNumber) caseNumber.textContent = caseData.number;
-    if (caseQuestion) caseQuestion.textContent = caseData.question;
-    if (caseEvidence) caseEvidence.textContent = `💡 Подсказка: ${caseData.evidence}`;
-    
-    if (caseOptions) {
-        caseOptions.innerHTML = '';
-        
-        caseData.options.forEach((option, index) => {
+    // Отображаем варианты ответов
+    const optionsContainer = document.getElementById('quizOptions');
+    if (optionsContainer) {
+        optionsContainer.innerHTML = '';
+        questionData.options.forEach((option, index) => {
             const optionElement = document.createElement('div');
-            optionElement.className = 'case-option';
+            optionElement.className = 'quiz-option';
             optionElement.textContent = option;
             optionElement.dataset.index = index;
             
             optionElement.addEventListener('click', function() {
-                document.querySelectorAll('.case-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                this.classList.add('selected');
+                selectOption(this);
             });
             
-            caseOptions.appendChild(optionElement);
+            optionsContainer.appendChild(optionElement);
         });
     }
     
-    if (quizCase) quizCase.style.display = 'block';
-    if (quizResults) quizResults.style.display = 'none';
+    // Обновляем кнопки навигации
+    updateNavigationButtons();
 }
 
-function checkAnswer() {
-    const selectedOption = document.querySelector('.case-option.selected');
+// Обновление прогресса
+function updateProgress() {
+    const progressFill = document.getElementById('progressFill');
+    const currentQuestionElement = document.getElementById('currentQuestion');
     
-    if (!selectedOption) {
-        alert('Выберите вариант ответа!');
+    if (progressFill) {
+        const progress = ((currentQuestion + 1) / quizData.length) * 100;
+        progressFill.style.width = `${progress}%`;
+    }
+    
+    if (currentQuestionElement) {
+        currentQuestionElement.textContent = currentQuestion + 1;
+    }
+}
+
+// Выбор варианта ответа
+function selectOption(optionElement) {
+    // Снимаем выделение со всех вариантов
+    const allOptions = document.querySelectorAll('.quiz-option');
+    allOptions.forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    
+    // Выделяем выбранный вариант
+    optionElement.classList.add('selected');
+    
+    // Анимация выбора
+    optionElement.style.animation = 'fadeIn 0.3s ease';
+}
+
+// Следующий вопрос
+function nextQuestion() {
+    const selectedOption = document.querySelector('.quiz-option.selected');
+    
+    if (!selectedOption && currentQuestion < quizData.length - 1) {
+        alert('Пожалуйста, выберите ответ!');
         return;
     }
     
-    const selectedIndex = parseInt(selectedOption.dataset.index);
-    const correctIndex = quizCases[currentCase].correct;
-    
-    // Подсветка правильного/неправильного ответа
-    document.querySelectorAll('.case-option').forEach((option, index) => {
-        if (index === correctIndex) {
-            option.style.borderColor = '#10b981';
-            option.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
-        } else if (index === selectedIndex && index !== correctIndex) {
-            option.style.borderColor = '#ef4444';
-            option.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+    // Проверяем ответ, если выбран
+    if (selectedOption) {
+        const selectedIndex = parseInt(selectedOption.dataset.index);
+        const isCorrect = selectedIndex === quizData[currentQuestion].correct;
+        
+        if (isCorrect) {
+            quizScore++;
+            selectedOption.classList.add('correct');
+        } else {
+            selectedOption.classList.add('wrong');
+            // Подсвечиваем правильный ответ
+            const correctOption = document.querySelector(`.quiz-option[data-index="${quizData[currentQuestion].correct}"]`);
+            if (correctOption) {
+                correctOption.classList.add('correct');
+            }
         }
-        option.style.pointerEvents = 'none';
-    });
-    
-    if (selectedIndex === correctIndex) {
-        quizScore++;
-        playSound('success');
-    } else {
-        playSound('error');
+        
+        // Блокируем дальнейший выбор
+        const allOptions = document.querySelectorAll('.quiz-option');
+        allOptions.forEach(opt => {
+            opt.style.pointerEvents = 'none';
+        });
     }
     
-    // Переход к следующему вопросу
+    // Переход к следующему вопросу или завершение
     setTimeout(() => {
-        currentCase++;
-        if (currentCase < quizCases.length) {
-            displayCase();
+        if (currentQuestion < quizData.length - 1) {
+            currentQuestion++;
+            displayQuestion();
         } else {
-            showQuizResults();
+            showResults();
         }
-    }, 2000);
+    }, 1500);
+    
+    playSound('click');
 }
 
-function showQuizResults() {
-    const quizCase = document.getElementById('quizCase');
-    const quizResults = document.getElementById('quizResults');
-    const quizScoreEl = document.getElementById('quizScore');
-    const rankTitle = document.getElementById('rankTitle');
+// Предыдущий вопрос
+function prevQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        displayQuestion();
+        playSound('click');
+    }
+}
+
+// Обновление кнопок навигации
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
     
-    if (quizCase) quizCase.style.display = 'none';
+    if (prevBtn) {
+        prevBtn.disabled = currentQuestion === 0;
+    }
+    
+    if (nextBtn && submitBtn) {
+        if (currentQuestion === quizData.length - 1) {
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'inline-flex';
+        } else {
+            nextBtn.style.display = 'inline-flex';
+            submitBtn.style.display = 'none';
+        }
+    }
+}
+
+// Завершение теста
+function submitQuiz() {
+    showResults();
+    playSound('click');
+}
+
+// Показать результаты
+function showResults() {
+    const quizContainer = document.querySelector('.quiz-container');
+    const quizResults = document.getElementById('quizResults');
+    const scoreElement = document.getElementById('score');
+    const resultText = document.getElementById('resultText');
+    
+    if (quizContainer) quizContainer.style.display = 'none';
     if (quizResults) quizResults.style.display = 'block';
     
-    if (quizScoreEl) quizScoreEl.textContent = quizScore;
+    if (scoreElement) {
+        scoreElement.textContent = `${quizScore}/${quizData.length}`;
+        scoreElement.style.animation = 'scorePop 0.5s ease';
+    }
     
-    if (rankTitle) {
-        if (quizScore === 5) {
-            rankTitle.textContent = 'Звание: ЭЛИТНЫЙ ЭКО-ДЕТЕКТИВ 🕵️‍♂️';
-            rankTitle.style.color = '#f59e0b';
-        } else if (quizScore >= 3) {
-            rankTitle.textContent = 'Звание: СТАЖЁР ЭКО-ДЕТЕКТИВА 🔍';
-            rankTitle.style.color = '#10b981';
-        } else {
-            rankTitle.textContent = 'Звание: НАБЛЮДАТЕЛЬ 👀';
-            rankTitle.style.color = '#6b7280';
-        }
+    if (resultText) {
+        const message = resultMessages.find(m => quizScore >= m.min && quizScore <= m.max);
+        resultText.textContent = message ? message.message : 'Спасибо за участие!';
     }
 }
 
+// Сброс викторины
 function resetQuiz() {
-    currentCase = 0;
+    currentQuestion = 0;
     quizScore = 0;
-    displayCase();
+    
+    const quizContainer = document.querySelector('.quiz-container');
+    const quizResults = document.getElementById('quizResults');
+    
+    if (quizContainer) quizContainer.style.display = 'block';
+    if (quizResults) quizResults.style.display = 'none';
+    
+    displayQuestion();
     playSound('click');
 }
 
-// Чек-лист
-function initChecklist() {
-    const generateBtn = document.getElementById('generateChecklist');
-    const rinseBtn = document.getElementById('rinseBtn');
+// Параллакс эффект
+function initParallax() {
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
     
-    if (generateBtn) generateBtn.addEventListener('click', generateChecklistPreview);
-    if (rinseBtn) rinseBtn.addEventListener('click', simulateRinse);
-}
-
-function generateChecklistPreview() {
-    const selectedRooms = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-        .map(cb => cb.dataset.room);
-    
-    let previewHTML = '<h4>Ваш чек-лист безопасности:</h4><ul>';
-    
-    selectedRooms.forEach(room => {
-        const tasks = getRoomTasks(room);
-        previewHTML += `<li><strong>${getRoomName(room)}:</strong><ul>`;
-        tasks.forEach(task => {
-            previewHTML += `<li>${task}</li>`;
-        });
-        previewHTML += '</ul></li>';
-    });
-    
-    previewHTML += '</ul>';
-    previewHTML += '<p><strong>Проверяйте составы, выбирайте эко-средства, берегите здоровье!</strong></p>';
-    
-    const preview = document.getElementById('checklistPreview');
-    if (preview) {
-        preview.innerHTML = previewHTML;
-        preview.style.display = 'block';
-    }
-    
-    playSound('click');
-}
-
-function getRoomName(room) {
-    const names = {
-        kitchen: 'Кухня',
-        bathroom: 'Ванная',
-        laundry: 'Прачечная',
-        kids: 'Детская'
-    };
-    return names[room] || room;
-}
-
-function getRoomTasks(room) {
-    const tasks = {
-        kitchen: [
-            'Проверить средство для посуды на фосфаты',
-            'Заменить чистящие порошки на соду',
-            'Использовать уксус для удаления накипи'
-        ],
-        bathroom: [
-            'Проверить стиральный порошок',
-            'Заменить чистящие средства на лимонную кислоту',
-            'Использовать эко-гели для душа'
-        ],
-        laundry: [
-            'Выбрать бесфосфатный порошок',
-            'Использовать температуру 60°C для полоскания',
-            'Применять уксус вместо кондиционера'
-        ],
-        kids: [
-            'Проверить детский порошок',
-            'Использовать гипоаллергенные средства',
-            'Двойное полоскание детских вещей'
-        ]
-    };
-    return tasks[room] || ['Проверить все средства в комнате'];
-}
-
-function simulateRinse() {
-    const water = document.getElementById('rinseWater');
-    if (!water) return;
-    
-    water.style.height = '100px';
-    water.style.backgroundColor = '#06b6d4';
-    
-    // Анимация полоскания
-    let bubbles = 0;
-    const bubbleInterval = setInterval(() => {
-        const bubble = document.createElement('div');
-        bubble.style.cssText = `
-            position: absolute;
-            width: ${10 + Math.random() * 10}px;
-            height: ${10 + Math.random() * 10}px;
-            background-color: white;
-            border-radius: 50%;
-            left: ${Math.random() * 90 + 5}%;
-            top: ${80 - bubbles * 3}%;
-            opacity: 0.7;
-        `;
-        water.appendChild(bubble);
+    window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const rate = scrolled * -0.5;
         
-        bubbles++;
-        
-        if (bubbles > 15) {
-            clearInterval(bubbleInterval);
-            setTimeout(() => {
-                while (water.firstChild) {
-                    water.removeChild(water.firstChild);
-                }
-                water.style.backgroundColor = '#22d3ee';
-            }, 1000);
-        }
-    }, 100);
-    
-    playSound('click');
-}
-
-// Схема распространения
-function initScheme() {
-    const schemeBtn = document.getElementById('playScheme');
-    if (!schemeBtn) return;
-    
-    schemeBtn.addEventListener('click', function() {
-        const steps = document.querySelectorAll('.scheme-step');
-        if (steps.length === 0) return;
-        
-        this.disabled = true;
-        let currentStep = 0;
-        
-        const interval = setInterval(() => {
-            steps.forEach(step => step.classList.remove('active'));
-            
-            if (currentStep < steps.length) {
-                steps[currentStep].classList.add('active');
-                currentStep++;
-            } else {
-                clearInterval(interval);
-                this.disabled = false;
-                steps.forEach(step => step.classList.remove('active'));
-                steps[0].classList.add('active');
-            }
-        }, 800);
-        
-        playSound('click');
+        hero.style.transform = `translate3d(0, ${rate}px, 0)`;
     });
 }
 
-// Все обработчики событий
-function initEventListeners() {
-    // Начало расследования
-    const startInvestigationBtn = document.getElementById('startInvestigation');
-    if (startInvestigationBtn) {
-        startInvestigationBtn.addEventListener('click', function() {
-            const investigateSection = document.getElementById('investigate');
-            if (investigateSection) {
-                investigateSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            playSound('click');
-        });
-    }
+// Анимации при скролле
+function initScrollAnimations() {
+    const elements = document.querySelectorAll('.card, .danger-card, .step-card, .point');
     
-    // Клик по органам
-    document.querySelectorAll('.organ').forEach(organ => {
-        organ.addEventListener('click', function() {
-            const organName = this.dataset.organ;
-            const info = {
-                stomach: 'Желудок: фосфаты могут нарушать всасывание минералов.',
-                lungs: 'Лёгкие: вдыхание порошков с фосфатами раздражает дыхательные пути.',
-                kidneys: 'Почки: выводят фосфаты, при избытке — нагрузка увеличивается.',
-                liver: 'Печень: обезвреживает токсины, включая фосфатные соединения.'
-            };
-            
-            alert(`🧬 ${organName.toUpperCase()}\n\n${info[organName]}`);
-            playSound('click');
-        });
-    });
-    
-    // Печать гайда
-    const printBtn = document.getElementById('printGuide');
-    if (printBtn) {
-        printBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.print();
-        });
-    }
-    
-    // Река
-    const polluteBtn = document.getElementById('polluteRiver');
-    const cleanBtn = document.getElementById('cleanRiver');
-    
-    if (polluteBtn) {
-        polluteBtn.addEventListener('click', function() {
-            alert('Река загрязнена фосфатами! 🌊→🌿\n\nВодоросли начинают цвести, рыбам не хватает кислорода.');
-            playSound('click');
-        });
-    }
-    
-    if (cleanBtn) {
-        cleanBtn.addEventListener('click', function() {
-            alert('Река очищена! 🌿→🌊\n\nЭко-фильтры удалили фосфаты, вода снова чистая.');
-            playSound('success');
-        });
-    }
-    
-    // Кнопки молекулы
-    const moleculeBtns = document.querySelectorAll('.molecule-viewer-btn');
-    moleculeBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            alert('3D молекула фосфата\n\nФормула: PO₄³⁻\n\nЭто анион, состоящий из одного атома фосфора и четырёх атомов кислорода.');
-            playSound('click');
-        });
-    });
-    
-    // Воспроизведение звуков при кликах
-    document.querySelectorAll('button, .room, .product, .case-option, .river-btn').forEach(element => {
-        element.addEventListener('click', function() {
-            if (!this.id || !this.id.includes('sound')) {
-                playSound('click');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-up');
+                observer.unobserve(entry.target);
             }
         });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+    
+    elements.forEach(element => {
+        observer.observe(element);
     });
 }
 
-// Запуск анимации при скролле
-window.addEventListener('scroll', function() {
-    const scheme = document.querySelector('.interactive-scheme');
-    if (!scheme) return;
-    
-    const schemePosition = scheme.getBoundingClientRect().top;
-    const screenPosition = window.innerHeight / 1.3;
-    
-    if (schemePosition < screenPosition) {
-        scheme.classList.add('animated');
-    }
-});
+// Инициализация с задержкой для стабильности
+setTimeout(() => {
+    console.log('Запуск анимаций...');
+}, 100);
 
-// Дебаг информация
-console.log('Скрипт успешно загружен!');
-console.log('Найдено элементов:');
-console.log('- Кнопок:', document.querySelectorAll('button').length);
-console.log('- Карточек:', document.querySelectorAll('.card').length);
-console.log('- Продуктов:', document.querySelectorAll('.product').length);
+// Обработка ошибок
+window.onerror = function(msg, url, line) {
+    console.error('Ошибка:', msg, 'в строке', line);
+    return true;
+};
+
+// Экспорт функций для отладки
+window.app = {
+    initAll,
+    setTheme,
+    nextQuestion,
+    prevQuestion,
+    resetQuiz,
+    showRecipes,
+    printChecklist
+};
+
+console.log('Приложение готово к работе!');
