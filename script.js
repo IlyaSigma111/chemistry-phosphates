@@ -102,40 +102,79 @@ const alternatives = [
     "Энзимные пятновыводители"
 ];
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
+// Ждём полной загрузки страницы
+window.addEventListener('load', function() {
+    console.log('Страница полностью загружена!');
+    initAll();
+});
+
+// Инициализация всего
+function initAll() {
+    console.log('Инициализация начата...');
+    
+    // Проверяем существование элементов перед инициализацией
+    if (!checkRequiredElements()) {
+        console.error('Не все элементы найдены!');
+        return;
+    }
+    
     initTheme();
     initSound();
     initHouseInteraction();
     initSkinSlider();
-    initRiverCanvas();
     initGame();
     initQuiz();
     initChecklist();
-    initMoleculeViewer();
     initEventListeners();
     animateStats();
-    updateScheme();
-});
+    initScheme();
+    
+    console.log('Инициализация завершена успешно!');
+}
+
+// Проверка необходимых элементов
+function checkRequiredElements() {
+    const requiredIds = [
+        'themeToggle', 'soundToggle', 'startInvestigation',
+        'stat1', 'stat2', 'stat3', 'skinSlider', 'skinValue',
+        'startGame', 'gameTimer', 'gameFound', 'gameScore',
+        'playScheme'
+    ];
+    
+    let allFound = true;
+    requiredIds.forEach(id => {
+        if (!document.getElementById(id)) {
+            console.warn('Элемент не найден:', id);
+            allFound = false;
+        }
+    });
+    
+    return allFound;
+}
 
 // Инициализация темы
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     
-    document.getElementById('themeToggle').addEventListener('click', function() {
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-        playSound('click');
-    });
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', function() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+            playSound('click');
+        });
+    }
 }
 
 function setTheme(theme) {
     currentTheme = theme;
     document.body.className = theme === 'dark' ? 'dark-theme' : '';
     const icon = document.querySelector('#themeToggle i');
-    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    if (icon) {
+        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
 }
 
 // Управление звуком
@@ -144,52 +183,53 @@ function initSound() {
     soundEnabled = savedSound === 'enabled';
     updateSoundIcon();
     
-    document.getElementById('soundToggle').addEventListener('click', function() {
-        soundEnabled = !soundEnabled;
-        localStorage.setItem('sound', soundEnabled ? 'enabled' : 'disabled');
-        updateSoundIcon();
-        playSound('click');
-    });
+    const soundBtn = document.getElementById('soundToggle');
+    if (soundBtn) {
+        soundBtn.addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('sound', soundEnabled ? 'enabled' : 'disabled');
+            updateSoundIcon();
+            playSound('click');
+        });
+    }
 }
 
 function updateSoundIcon() {
     const icon = document.querySelector('#soundToggle i');
-    icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+    if (icon) {
+        icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+    }
 }
 
 function playSound(type) {
     if (!soundEnabled) return;
-    
-    const sound = document.getElementById(type + 'Sound');
-    if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(e => console.log("Звук не воспроизведён:", e));
-    }
+    console.log('Воспроизведение звука:', type);
 }
 
 // Анимация статистики
 function animateStats() {
-    animateCounter('stat1', 0, 78, 2000); // 78% средств с фосфатами
-    animateCounter('stat2', 0, 34, 2500); // 34% заболеваний кожи
-    animateCounter('stat3', 0, 65, 3000); // 65% водоёмов загрязнено
+    animateCounter('stat1', 0, 78, 2000, '%');
+    animateCounter('stat2', 0, 34, 2500, '%');
+    animateCounter('stat3', 0, 65, 3000, '%');
 }
 
-function animateCounter(elementId, start, end, duration) {
+function animateCounter(elementId, start, end, duration, suffix = '') {
     const element = document.getElementById(elementId);
+    if (!element) return;
+    
     let startTime = null;
+    const step = (end - start) / (duration / 16); // 60 FPS
     
     function updateCounter(timestamp) {
         if (!startTime) startTime = timestamp;
-        const progress = timestamp - startTime;
-        const percentage = Math.min(progress / duration, 1);
+        const elapsed = timestamp - startTime;
         
-        const value = Math.floor(start + (end - start) * percentage);
-        element.textContent = value + (elementId === 'stat1' ? '%' : '%');
-        
-        if (percentage < 1) {
+        if (elapsed < duration) {
+            const current = Math.min(start + (elapsed / duration) * (end - start), end);
+            element.textContent = Math.floor(current) + suffix;
             requestAnimationFrame(updateCounter);
         } else {
-            element.textContent = end + (elementId === 'stat1' ? '%' : '%');
+            element.textContent = end + suffix;
         }
     }
     
@@ -202,28 +242,21 @@ function initHouseInteraction() {
     
     rooms.forEach(room => {
         room.addEventListener('mouseenter', function() {
-            const roomType = this.dataset.room;
-            showRoomInfo(roomType);
+            this.style.transform = 'translateY(-10px) scale(1.1)';
             animateDots(this);
-            playSound('click');
+        });
+        
+        room.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
         });
         
         room.addEventListener('click', function() {
-            const roomType = this.dataset.room;
-            alert(getRoomAlert(roomType));
+            const roomType = this.classList.contains('bathroom') ? 'ванной' :
+                           this.classList.contains('kitchen') ? 'кухни' : 'спальни';
+            alert(`🔍 Проверьте средства в ${roomType} на содержание фосфатов!`);
+            playSound('click');
         });
     });
-}
-
-function showRoomInfo(roomType) {
-    const info = {
-        bathroom: "Ванная: стиральные порошки, гели для душа",
-        kitchen: "Кухня: средства для посуды, чистящие средства",
-        bedroom: "Спальня: постельное белье после стирки"
-    };
-    
-    // Можно добавить всплывающую подсказку
-    console.log(info[roomType]);
 }
 
 function animateDots(roomElement) {
@@ -233,205 +266,62 @@ function animateDots(roomElement) {
     });
 }
 
-function getRoomAlert(roomType) {
-    const alerts = {
-        bathroom: "🧴 В ванной чаще всего содержатся фосфаты в стиральных порошках и чистящих средствах. Проверьте состав!",
-        kitchen: "🍽️ На кухне фосфаты прячутся в средствах для мытья посуды. Ищите надпись 'phosphate-free'.",
-        bedroom: "🛏️ В спальне фосфаты могут оставаться на постельном белье после стирки. Тщательно полоскайте!"
-    };
-    return alerts[roomType];
-}
-
 // Слайдер кожи
 function initSkinSlider() {
     const slider = document.getElementById('skinSlider');
     const valueDisplay = document.getElementById('skinValue');
     const damagedSkin = document.querySelector('.damaged');
     
-    slider.addEventListener('input', function() {
-        const value = this.value;
-        valueDisplay.textContent = value + '%';
-        
-        // Анимация повреждения кожи
-        const damagePercent = value + '%';
-        damagedSkin.style.clipPath = `polygon(0 0, ${damagePercent} 0, ${damagePercent} 100%, 0% 100%)`;
-        
-        // Цвет текста в зависимости от значения
-        if (value > 70) {
-            valueDisplay.style.color = 'var(--danger)';
-        } else if (value > 30) {
-            valueDisplay.style.color = 'var(--warning)';
-        } else {
-            valueDisplay.style.color = 'var(--primary)';
-        }
-    });
-}
-
-// Канвас реки
-function initRiverCanvas() {
-    const canvas = document.getElementById('riverCanvas');
-    const ctx = canvas.getContext('2d');
-    let pollutionLevel = 0;
-    let algae = [];
-    
-    // Инициализация водорослей
-    for (let i = 0; i < 5; i++) {
-        algae.push({
-            x: Math.random() * canvas.width,
-            y: canvas.height - 50 + Math.random() * 30,
-            size: 5 + Math.random() * 10,
-            growth: 0
+    if (slider && valueDisplay && damagedSkin) {
+        slider.addEventListener('input', function() {
+            const value = this.value;
+            valueDisplay.textContent = value + '%';
+            
+            // Анимация повреждения кожи
+            const damagePercent = value + '%';
+            damagedSkin.style.clipPath = `polygon(0 0, ${damagePercent} 0, ${damagePercent} 100%, 0% 100%)`;
+            
+            // Цвет текста в зависимости от значения
+            if (value > 70) {
+                valueDisplay.style.color = '#ef4444';
+            } else if (value > 30) {
+                valueDisplay.style.color = '#f59e0b';
+            } else {
+                valueDisplay.style.color = '#10b981';
+            }
         });
-    }
-    
-    function drawRiver() {
-        // Очистка канваса
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Рисуем реку
-        ctx.fillStyle = pollutionLevel > 0 ? '#0d9488' : '#06b6d4';
-        ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
-        
-        // Волны
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 5; i++) {
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height - 80 + i * 10);
-            ctx.bezierCurveTo(
-                100, canvas.height - 85 + i * 10,
-                200, canvas.height - 75 + i * 10,
-                canvas.width, canvas.height - 80 + i * 10
-            );
-            ctx.stroke();
-        }
-        
-        // Рыбы (меньше при загрязнении)
-        const fishCount = Math.max(1, 5 - Math.floor(pollutionLevel / 20));
-        for (let i = 0; i < fishCount; i++) {
-            const x = (Date.now() / 1000 * 20 + i * 100) % (canvas.width + 50) - 50;
-            const y = canvas.height - 60 + Math.sin(Date.now() / 1000 + i) * 10;
-            drawFish(x, y);
-        }
-        
-        // Водоросли (больше при загрязнении)
-        algae.forEach(alga => {
-            const maxSize = 20 + pollutionLevel / 2;
-            alga.size = Math.min(alga.size + pollutionLevel / 100, maxSize);
-            
-            ctx.fillStyle = pollutionLevel > 0 ? '#84cc16' : '#10b981';
-            ctx.beginPath();
-            ctx.ellipse(alga.x, alga.y, alga.size, alga.size / 2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Стебель
-            ctx.fillStyle = '#065f46';
-            ctx.fillRect(alga.x - 2, alga.y, 4, 50);
-        });
-        
-        // Пузырьки воздуха (меньше при загрязнении)
-        for (let i = 0; i < 10 - pollutionLevel / 10; i++) {
-            const x = Math.random() * canvas.width;
-            const y = canvas.height - 100 + (Date.now() / 100 + i * 50) % 100;
-            const size = 2 + Math.random() * 3;
-            
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.5 - pollutionLevel / 100})`;
-            ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        
-        // Уровень загрязнения
-        if (pollutionLevel > 0) {
-            ctx.fillStyle = `rgba(132, 204, 22, ${pollutionLevel / 100})`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height - 100);
-            
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`Загрязнение: ${Math.round(pollutionLevel)}%`, canvas.width / 2, 30);
-        }
-    }
-    
-    function drawFish(x, y) {
-        ctx.fillStyle = pollutionLevel > 50 ? '#6b7280' : '#f59e0b';
-        ctx.beginPath();
-        ctx.ellipse(x, y, 15, 8, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Хвост
-        ctx.beginPath();
-        ctx.moveTo(x - 15, y);
-        ctx.lineTo(x - 25, y - 10);
-        ctx.lineTo(x - 25, y + 10);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Глаз
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(x + 8, y - 3, 2, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    
-    // Анимация
-    function animate() {
-        drawRiver();
-        requestAnimationFrame(animate);
-    }
-    animate();
-    
-    // Обработчики кнопок
-    document.getElementById('polluteRiver').addEventListener('click', function() {
-        pollutionLevel = Math.min(100, pollutionLevel + 20);
-        updateToxicity(pollutionLevel);
-        playSound('click');
-    });
-    
-    document.getElementById('cleanRiver').addEventListener('click', function() {
-        pollutionLevel = 0;
-        algae.forEach(alga => alga.size = 5 + Math.random() * 10);
-        updateToxicity(0);
-        playSound('success');
-    });
-}
-
-function updateToxicity(level) {
-    const fill = document.getElementById('toxicityFill');
-    const value = document.querySelector('.toxicity-value');
-    
-    fill.style.width = level + '%';
-    
-    if (level > 70) {
-        value.textContent = 'Очень высокая';
-        value.style.color = 'var(--danger)';
-    } else if (level > 40) {
-        value.textContent = 'Средняя';
-        value.style.color = 'var(--warning)';
-    } else if (level > 10) {
-        value.textContent = 'Низкая';
-        value.style.color = 'var(--primary)';
-    } else {
-        value.textContent = 'Минимальная';
-        value.style.color = 'var(--primary)';
     }
 }
 
 // Игра "Найди фосфаты"
 function initGame() {
-    generateProducts();
+    const startBtn = document.getElementById('startGame');
+    const resetBtn = document.getElementById('resetGame');
+    const downloadBtn = document.getElementById('downloadChecklist');
     
-    document.getElementById('startGame').addEventListener('click', startGame);
-    document.getElementById('resetGame').addEventListener('click', resetGame);
-    document.getElementById('downloadChecklist').addEventListener('click', downloadChecklist);
+    if (startBtn) {
+        startBtn.addEventListener('click', startGame);
+    }
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetGame);
+    }
+    
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', downloadChecklist);
+    }
+    
+    generateProducts();
 }
 
 function generateProducts() {
     const shelf = document.getElementById('shelf');
+    if (!shelf) return;
+    
     shelf.innerHTML = '';
     
     // Перемешиваем продукты
-    const shuffledProducts = [...products].sort(() => Math.random() - 0.5);
+    const shuffledProducts = [...products].sort(() => Math.random() - 0.5).slice(0, 8);
     
     shuffledProducts.forEach((product, index) => {
         const productElement = document.createElement('div');
@@ -461,7 +351,7 @@ function generateProducts() {
                     }
                 }
             } else {
-                this.style.borderColor = 'var(--danger)';
+                this.style.borderColor = '#ef4444';
                 gameScore = Math.max(0, gameScore - 50);
                 updateGameStats();
                 playSound('error');
@@ -477,17 +367,24 @@ function generateProducts() {
 }
 
 function startGame() {
+    if (gameActive) return;
+    
     gameActive = true;
     gameTime = 60;
     foundPhosphates = 0;
     gameScore = 0;
+    totalPhosphates = document.querySelectorAll('.product.danger').length;
     
-    document.getElementById('startGame').disabled = true;
-    document.getElementById('gameResults').style.display = 'none';
+    const startBtn = document.getElementById('startGame');
+    const results = document.getElementById('gameResults');
+    
+    if (startBtn) startBtn.disabled = true;
+    if (results) results.style.display = 'none';
     
     // Сброс всех продуктов
     document.querySelectorAll('.product').forEach(product => {
         product.classList.remove('selected');
+        product.style.borderColor = '';
     });
     
     updateGameStats();
@@ -508,75 +405,92 @@ function startGame() {
 function resetGame() {
     clearInterval(gameTimer);
     gameActive = false;
-    document.getElementById('startGame').disabled = false;
+    
+    const startBtn = document.getElementById('startGame');
+    if (startBtn) startBtn.disabled = false;
+    
     generateProducts();
     updateGameStats();
+    
+    const results = document.getElementById('gameResults');
+    if (results) results.style.display = 'none';
+    
+    playSound('click');
 }
 
 function updateGameStats() {
-    document.getElementById('gameTimer').textContent = gameTime;
-    document.getElementById('gameFound').textContent = `${foundPhosphates}/${totalPhosphates}`;
-    document.getElementById('gameScore').textContent = gameScore;
+    const timerEl = document.getElementById('gameTimer');
+    const foundEl = document.getElementById('gameFound');
+    const scoreEl = document.getElementById('gameScore');
+    
+    if (timerEl) timerEl.textContent = gameTime;
+    if (foundEl) foundEl.textContent = `${foundPhosphates}/${totalPhosphates}`;
+    if (scoreEl) scoreEl.textContent = gameScore;
 }
 
 function endGame(won) {
     clearInterval(gameTimer);
     gameActive = false;
-    document.getElementById('startGame').disabled = false;
     
+    const startBtn = document.getElementById('startGame');
     const results = document.getElementById('gameResults');
     const message = document.getElementById('gameMessage');
     const alternativesList = document.getElementById('alternativesList');
     
-    results.style.display = 'block';
+    if (startBtn) startBtn.disabled = false;
     
-    if (won) {
-        message.textContent = `Поздравляем! Вы нашли все фосфаты за ${60 - gameTime} секунд!`;
-        message.style.color = 'var(--primary)';
-        playSound('success');
-    } else {
-        message.textContent = `Время вышло! Вы нашли ${foundPhosphates} из ${totalPhosphates} фосфатов.`;
-        message.style.color = 'var(--danger)';
-        playSound('error');
+    if (results) {
+        results.style.display = 'block';
+        
+        if (won) {
+            if (message) {
+                message.textContent = `Поздравляем! Вы нашли все фосфаты за ${60 - gameTime} секунд!`;
+                message.style.color = '#10b981';
+            }
+            playSound('success');
+        } else {
+            if (message) {
+                message.textContent = `Время вышло! Вы нашли ${foundPhosphates} из ${totalPhosphates} фосфатов.`;
+                message.style.color = '#ef4444';
+            }
+            playSound('error');
+        }
+        
+        // Показываем альтернативы
+        if (alternativesList) {
+            alternativesList.innerHTML = '';
+            alternatives.forEach(alt => {
+                const li = document.createElement('li');
+                li.textContent = alt;
+                alternativesList.appendChild(li);
+            });
+        }
     }
-    
-    // Показываем альтернативы
-    alternativesList.innerHTML = '';
-    alternatives.forEach(alt => {
-        const li = document.createElement('li');
-        li.textContent = alt;
-        alternativesList.appendChild(li);
-    });
 }
 
 function downloadChecklist() {
     const checklistContent = `
-        ЧЕК-ЛИСТ БЕЗОПАСНОСТИ ОТ ФОСФАТОВ
-        ==================================
-        
-        1. ПРОВЕРЬТЕ СРЕДСТВА:
-        - Стиральные порошки
-        - Средства для посуды
-        - Чистящие средства
-        
-        2. ЧИТАЙТЕ СОСТАВ:
-        Избегайте: Фосфаты, Sodium Phosphate, Potassium Phosphate
-        
-        3. ВЫБИРАЙТЕ ЗНАКИ:
-        ✅ ECOCERT
-        ✅ EU Ecolabel
-        ✅ Листок жизни
-        
-        4. БЕЗОПАСНЫЕ АЛЬТЕРНАТИВЫ:
-        ${alternatives.join('\n        ')}
-        
-        5. ДОМАШНИЕ СРЕДСТВА:
-        - Сода + хозяйственное мыло
-        - Уксус для ополаскивания
-        - Горчичный порошок для посуды
-        
-        Сгенерировано на сайте "Фосфаты: невидимая угроза"
-        ${new Date().toLocaleDateString()}
+ЧЕК-ЛИСТ БЕЗОПАСНОСТИ ОТ ФОСФАТОВ
+==================================
+
+1. ПРОВЕРЬТЕ СРЕДСТВА:
+- Стиральные порошки
+- Средства для посуды
+- Чистящие средства
+
+2. ЧИТАЙТЕ СОСТАВ:
+Избегайте: Фосфаты, Sodium Phosphate, Potassium Phosphate
+
+3. ВЫБРАЙТЕ ЗНАКИ:
+✅ ECOCERT
+✅ EU Ecolabel
+✅ Листок жизни
+
+4. БЕЗОПАСНЫЕ АЛЬТЕРНАТИВЫ:
+${alternatives.join('\n')}
+
+Сгенерировано на сайте "Фосфаты: невидимая угроза"
+${new Date().toLocaleDateString()}
     `;
     
     const blob = new Blob([checklistContent], { type: 'text/plain' });
@@ -594,40 +508,56 @@ function downloadChecklist() {
 
 // Викторина
 function initQuiz() {
-    displayCase();
+    const submitBtn = document.getElementById('submitAnswer');
+    const retryBtn = document.getElementById('retryQuiz');
     
-    document.getElementById('submitAnswer').addEventListener('click', checkAnswer);
-    document.getElementById('retryQuiz').addEventListener('click', resetQuiz);
+    if (submitBtn) submitBtn.addEventListener('click', checkAnswer);
+    if (retryBtn) retryBtn.addEventListener('click', resetQuiz);
+    
+    displayCase();
 }
 
 function displayCase() {
+    if (currentCase >= quizCases.length) {
+        showQuizResults();
+        return;
+    }
+    
     const caseData = quizCases[currentCase];
     
-    document.getElementById('caseNumber').textContent = caseData.number;
-    document.getElementById('caseQuestion').textContent = caseData.question;
-    document.getElementById('caseEvidence').textContent = `💡 Подсказка: ${caseData.evidence}`;
+    const caseNumber = document.getElementById('caseNumber');
+    const caseQuestion = document.getElementById('caseQuestion');
+    const caseEvidence = document.getElementById('caseEvidence');
+    const caseOptions = document.getElementById('caseOptions');
+    const quizCase = document.getElementById('quizCase');
+    const quizResults = document.getElementById('quizResults');
     
-    const optionsContainer = document.getElementById('caseOptions');
-    optionsContainer.innerHTML = '';
+    if (caseNumber) caseNumber.textContent = caseData.number;
+    if (caseQuestion) caseQuestion.textContent = caseData.question;
+    if (caseEvidence) caseEvidence.textContent = `💡 Подсказка: ${caseData.evidence}`;
     
-    caseData.options.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.className = 'case-option';
-        optionElement.textContent = option;
-        optionElement.dataset.index = index;
+    if (caseOptions) {
+        caseOptions.innerHTML = '';
         
-        optionElement.addEventListener('click', function() {
-            document.querySelectorAll('.case-option').forEach(opt => {
-                opt.classList.remove('selected');
+        caseData.options.forEach((option, index) => {
+            const optionElement = document.createElement('div');
+            optionElement.className = 'case-option';
+            optionElement.textContent = option;
+            optionElement.dataset.index = index;
+            
+            optionElement.addEventListener('click', function() {
+                document.querySelectorAll('.case-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
             });
-            this.classList.add('selected');
+            
+            caseOptions.appendChild(optionElement);
         });
-        
-        optionsContainer.appendChild(optionElement);
-    });
+    }
     
-    document.getElementById('quizCase').style.display = 'block';
-    document.getElementById('quizResults').style.display = 'none';
+    if (quizCase) quizCase.style.display = 'block';
+    if (quizResults) quizResults.style.display = 'none';
 }
 
 function checkAnswer() {
@@ -644,10 +574,10 @@ function checkAnswer() {
     // Подсветка правильного/неправильного ответа
     document.querySelectorAll('.case-option').forEach((option, index) => {
         if (index === correctIndex) {
-            option.style.borderColor = 'var(--primary)';
+            option.style.borderColor = '#10b981';
             option.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
         } else if (index === selectedIndex && index !== correctIndex) {
-            option.style.borderColor = 'var(--danger)';
+            option.style.borderColor = '#ef4444';
             option.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
         }
         option.style.pointerEvents = 'none';
@@ -660,10 +590,10 @@ function checkAnswer() {
         playSound('error');
     }
     
-    // Переход к следующему вопросу или показ результатов
+    // Переход к следующему вопросу
     setTimeout(() => {
-        if (currentCase < quizCases.length - 1) {
-            currentCase++;
+        currentCase++;
+        if (currentCase < quizCases.length) {
             displayCase();
         } else {
             showQuizResults();
@@ -672,21 +602,27 @@ function checkAnswer() {
 }
 
 function showQuizResults() {
-    document.getElementById('quizCase').style.display = 'none';
-    document.getElementById('quizResults').style.display = 'block';
-    
-    document.getElementById('quizScore').textContent = quizScore;
-    
+    const quizCase = document.getElementById('quizCase');
+    const quizResults = document.getElementById('quizResults');
+    const quizScoreEl = document.getElementById('quizScore');
     const rankTitle = document.getElementById('rankTitle');
-    if (quizScore === 5) {
-        rankTitle.textContent = 'Звание: ЭЛИТНЫЙ ЭКО-ДЕТЕКТИВ 🕵️‍♂️';
-        rankTitle.style.color = 'var(--warning)';
-    } else if (quizScore >= 3) {
-        rankTitle.textContent = 'Звание: СТАЖЁР ЭКО-ДЕТЕКТИВА 🔍';
-        rankTitle.style.color = 'var(--primary)';
-    } else {
-        rankTitle.textContent = 'Звание: НАБЛЮДАТЕЛЬ 👀';
-        rankTitle.style.color = 'var(--gray)';
+    
+    if (quizCase) quizCase.style.display = 'none';
+    if (quizResults) quizResults.style.display = 'block';
+    
+    if (quizScoreEl) quizScoreEl.textContent = quizScore;
+    
+    if (rankTitle) {
+        if (quizScore === 5) {
+            rankTitle.textContent = 'Звание: ЭЛИТНЫЙ ЭКО-ДЕТЕКТИВ 🕵️‍♂️';
+            rankTitle.style.color = '#f59e0b';
+        } else if (quizScore >= 3) {
+            rankTitle.textContent = 'Звание: СТАЖЁР ЭКО-ДЕТЕКТИВА 🔍';
+            rankTitle.style.color = '#10b981';
+        } else {
+            rankTitle.textContent = 'Звание: НАБЛЮДАТЕЛЬ 👀';
+            rankTitle.style.color = '#6b7280';
+        }
     }
 }
 
@@ -699,8 +635,11 @@ function resetQuiz() {
 
 // Чек-лист
 function initChecklist() {
-    document.getElementById('generateChecklist').addEventListener('click', generateChecklistPreview);
-    document.getElementById('rinseBtn').addEventListener('click', simulateRinse);
+    const generateBtn = document.getElementById('generateChecklist');
+    const rinseBtn = document.getElementById('rinseBtn');
+    
+    if (generateBtn) generateBtn.addEventListener('click', generateChecklistPreview);
+    if (rinseBtn) rinseBtn.addEventListener('click', simulateRinse);
 }
 
 function generateChecklistPreview() {
@@ -721,8 +660,11 @@ function generateChecklistPreview() {
     previewHTML += '</ul>';
     previewHTML += '<p><strong>Проверяйте составы, выбирайте эко-средства, берегите здоровье!</strong></p>';
     
-    document.getElementById('checklistPreview').innerHTML = previewHTML;
-    document.getElementById('checklistPreview').style.display = 'block';
+    const preview = document.getElementById('checklistPreview');
+    if (preview) {
+        preview.innerHTML = previewHTML;
+        preview.style.display = 'block';
+    }
     
     playSound('click');
 }
@@ -765,20 +707,35 @@ function getRoomTasks(room) {
 
 function simulateRinse() {
     const water = document.getElementById('rinseWater');
+    if (!water) return;
+    
     water.style.height = '100px';
-    water.style.backgroundColor = 'var(--water-blue)';
+    water.style.backgroundColor = '#06b6d4';
     
     // Анимация полоскания
     let bubbles = 0;
     const bubbleInterval = setInterval(() => {
-        water.innerHTML += '<div class="bubble" style="position:absolute;width:10px;height:10px;background-color:white;border-radius:50%;left:' + 
-            (Math.random() * 90 + 5) + '%;top:' + (Math.random() * 80 + 10) + '%;"></div>';
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `
+            position: absolute;
+            width: ${10 + Math.random() * 10}px;
+            height: ${10 + Math.random() * 10}px;
+            background-color: white;
+            border-radius: 50%;
+            left: ${Math.random() * 90 + 5}%;
+            top: ${80 - bubbles * 3}%;
+            opacity: 0.7;
+        `;
+        water.appendChild(bubble);
+        
         bubbles++;
         
-        if (bubbles > 20) {
+        if (bubbles > 15) {
             clearInterval(bubbleInterval);
             setTimeout(() => {
-                water.innerHTML = '';
+                while (water.firstChild) {
+                    water.removeChild(water.firstChild);
+                }
                 water.style.backgroundColor = '#22d3ee';
             }, 1000);
         }
@@ -787,124 +744,29 @@ function simulateRinse() {
     playSound('click');
 }
 
-// Молекулярный вьювер
-function initMoleculeViewer() {
-    const modal = document.getElementById('moleculeModal');
-    const closeBtn = document.querySelector('.close-modal');
-    const openBtns = document.querySelectorAll('.molecule-viewer-btn');
-    
-    openBtns.forEach(btn => {
-        btn.addEventListener('click', openMoleculeViewer);
-    });
-    
-    closeBtn.addEventListener('click', closeMoleculeViewer);
-    
-    // Обработчики управления молекулой
-    document.getElementById('rotateMolecule').addEventListener('click', rotateMolecule);
-    document.getElementById('zoomIn').addEventListener('click', () => zoomMolecule(1.2));
-    document.getElementById('zoomOut').addEventListener('click', () => zoomMolecule(0.8));
-    
-    // Рисуем начальную молекулу
-    drawMolecule();
-}
-
-function openMoleculeViewer() {
-    document.getElementById('moleculeModal').style.display = 'flex';
-    playSound('click');
-}
-
-function closeMoleculeViewer() {
-    document.getElementById('moleculeModal').style.display = 'none';
-}
-
-function drawMolecule() {
-    const canvas = document.getElementById('moleculeCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Центр канваса
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        
-        // Фосфор (центральный атом)
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 30 * moleculeZoom, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = 'white';
-        ctx.font = `${20 * moleculeZoom}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('P', centerX, centerY);
-        
-        // Кислород (4 атома)
-        const angles = [0, 90, 180, 270];
-        angles.forEach(angle => {
-            const rad = (angle + moleculeRotation) * Math.PI / 180;
-            const x = centerX + Math.cos(rad) * 80 * moleculeZoom;
-            const y = centerY + Math.sin(rad) * 80 * moleculeZoom;
-            
-            // Связь
-            ctx.strokeStyle = '#6b7280';
-            ctx.lineWidth = 4 * moleculeZoom;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            
-            // Атом кислорода
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(x, y, 25 * moleculeZoom, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = 'white';
-            ctx.font = `${18 * moleculeZoom}px Arial`;
-            ctx.fillText('O', x, y);
-        });
-        
-        // Заряд
-        ctx.fillStyle = '#3b82f6';
-        ctx.font = `${16 * moleculeZoom}px Arial`;
-        ctx.fillText('3-', centerX, centerY + 50 * moleculeZoom);
-    }
-    
-    render();
-}
-
-function rotateMolecule() {
-    moleculeRotation = (moleculeRotation + 45) % 360;
-    drawMolecule();
-    playSound('click');
-}
-
-function zoomMolecule(factor) {
-    moleculeZoom = Math.max(0.5, Math.min(3, moleculeZoom * factor));
-    drawMolecule();
-    playSound('click');
-}
-
 // Схема распространения
-function updateScheme() {
-    const steps = document.querySelectorAll('.scheme-step');
-    let currentStep = 0;
+function initScheme() {
+    const schemeBtn = document.getElementById('playScheme');
+    if (!schemeBtn) return;
     
-    document.getElementById('playScheme').addEventListener('click', function() {
+    schemeBtn.addEventListener('click', function() {
+        const steps = document.querySelectorAll('.scheme-step');
+        if (steps.length === 0) return;
+        
         this.disabled = true;
+        let currentStep = 0;
         
         const interval = setInterval(() => {
             steps.forEach(step => step.classList.remove('active'));
-            steps[currentStep].classList.add('active');
             
-            currentStep++;
-            if (currentStep >= steps.length) {
+            if (currentStep < steps.length) {
+                steps[currentStep].classList.add('active');
+                currentStep++;
+            } else {
                 clearInterval(interval);
                 this.disabled = false;
                 steps.forEach(step => step.classList.remove('active'));
                 steps[0].classList.add('active');
-                currentStep = 0;
             }
         }, 800);
         
@@ -912,13 +774,19 @@ function updateScheme() {
     });
 }
 
-// Органы тела
+// Все обработчики событий
 function initEventListeners() {
     // Начало расследования
-    document.getElementById('startInvestigation').addEventListener('click', function() {
-        document.getElementById('investigate').scrollIntoView({ behavior: 'smooth' });
-        playSound('click');
-    });
+    const startInvestigationBtn = document.getElementById('startInvestigation');
+    if (startInvestigationBtn) {
+        startInvestigationBtn.addEventListener('click', function() {
+            const investigateSection = document.getElementById('investigate');
+            if (investigateSection) {
+                investigateSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            playSound('click');
+        });
+    }
     
     // Клик по органам
     document.querySelectorAll('.organ').forEach(organ => {
@@ -937,24 +805,56 @@ function initEventListeners() {
     });
     
     // Печать гайда
-    document.getElementById('printGuide').addEventListener('click', function(e) {
-        e.preventDefault();
-        window.print();
+    const printBtn = document.getElementById('printGuide');
+    if (printBtn) {
+        printBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.print();
+        });
+    }
+    
+    // Река
+    const polluteBtn = document.getElementById('polluteRiver');
+    const cleanBtn = document.getElementById('cleanRiver');
+    
+    if (polluteBtn) {
+        polluteBtn.addEventListener('click', function() {
+            alert('Река загрязнена фосфатами! 🌊→🌿\n\nВодоросли начинают цвести, рыбам не хватает кислорода.');
+            playSound('click');
+        });
+    }
+    
+    if (cleanBtn) {
+        cleanBtn.addEventListener('click', function() {
+            alert('Река очищена! 🌿→🌊\n\nЭко-фильтры удалили фосфаты, вода снова чистая.');
+            playSound('success');
+        });
+    }
+    
+    // Кнопки молекулы
+    const moleculeBtns = document.querySelectorAll('.molecule-viewer-btn');
+    moleculeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            alert('3D молекула фосфата\n\nФормула: PO₄³⁻\n\nЭто анион, состоящий из одного атома фосфора и четырёх атомов кислорода.');
+            playSound('click');
+        });
     });
     
     // Воспроизведение звуков при кликах
-    document.querySelectorAll('button, .room, .product, .case-option').forEach(element => {
+    document.querySelectorAll('button, .room, .product, .case-option, .river-btn').forEach(element => {
         element.addEventListener('click', function() {
-            if (this.id !== 'soundToggle') {
+            if (!this.id || !this.id.includes('sound')) {
                 playSound('click');
             }
         });
     });
 }
 
-// Запуск анимации схемы при скролле
+// Запуск анимации при скролле
 window.addEventListener('scroll', function() {
     const scheme = document.querySelector('.interactive-scheme');
+    if (!scheme) return;
+    
     const schemePosition = scheme.getBoundingClientRect().top;
     const screenPosition = window.innerHeight / 1.3;
     
@@ -962,3 +862,10 @@ window.addEventListener('scroll', function() {
         scheme.classList.add('animated');
     }
 });
+
+// Дебаг информация
+console.log('Скрипт успешно загружен!');
+console.log('Найдено элементов:');
+console.log('- Кнопок:', document.querySelectorAll('button').length);
+console.log('- Карточек:', document.querySelectorAll('.card').length);
+console.log('- Продуктов:', document.querySelectorAll('.product').length);
