@@ -1,430 +1,282 @@
-// Основные данные
-const quizQuestions = [
+// Данные для викторины
+const quizData = [
     {
-        question: "Что такое фосфаты в бытовой химии?",
+        question: "Где чаще всего содержатся фосфаты?",
         options: [
-            "Питательные вещества для растений",
-            "Соли фосфорной кислоты, смягчающие воду",
-            "Натуральные эфирные масла",
-            "Витаминные добавки для белья"
+            "В фруктах и овощах",
+            "В бытовой химии",
+            "В натуральных маслах",
+            "В дистиллированной воде"
         ],
-        correct: 1
+        correct: 1,
+        explanation: "Правильно! Фосфаты активно добавляют в стиральные порошки, моющие средства и другую бытовую химию для смягчения воды."
     },
     {
-        question: "Какой процент стиральных порошков содержит фосфаты?",
+        question: "Какой вред фосфаты наносят экологии?",
         options: [
-            "10-20%",
-            "30-40%",
-            "50-60%",
-            "70-80%"
+            "Укрепляют почву",
+            "Очищают воздух",
+            "Вызывают цветение водоемов",
+            "Помогают растениям"
         ],
-        correct: 3
+        correct: 2,
+        explanation: "Верно! Фосфаты приводят к эвтрофикации - бурному росту водорослей, что вызывает гибель рыбы и нарушение экобаланса."
     },
     {
-        question: "Как фосфаты влияют на кожу человека?",
+        question: "Как обозначаются фосфаты в составе продуктов?",
         options: [
-            "Увлажняют и питают",
-            "Вызывают сухость и аллергию",
-            "Защищают от солнца",
-            "Не оказывают никакого влияния"
+            "Буквой 'P' в круге",
+            "Sodium Tripolyphosphate",
+            "Aqua или Water",
+            "Natural extract"
         ],
-        correct: 1
+        correct: 1,
+        explanation: "Правильно! Sodium Tripolyphosphate - одно из распространенных названий фосфатов в составе."
     },
     {
-        question: "Что такое эвтрофикация водоёмов?",
+        question: "Какая безопасная альтернатива фосфатам?",
         options: [
-            "Очищение воды",
-            "Цветение водорослей из-за избытка фосфатов",
-            "Образование льда",
-            "Естественное старение озера"
+            "Хлор",
+            "Формальдегид",
+            "Мыльные орехи",
+            "Асбест"
         ],
-        correct: 1
+        correct: 2,
+        explanation: "Верно! Мыльные орехи - натуральное и безопасное средство для стирки без химии."
     },
     {
-        question: "Какой знак гарантирует отсутствие фосфатов?",
+        question: "Почему фосфаты опасны для кожи?",
         options: [
-            "ISO 9001",
-            "ECOCERT",
-            "CE mark",
-            "FCC"
+            "Они питают кожу",
+            "Увлажняют ее",
+            "Усиливают проникновение ПАВ",
+            "Защищают от солнца"
         ],
-        correct: 1
+        correct: 2,
+        explanation: "Правильно! Фосфаты разрушают защитный барьер кожи и усиливают проникновение вредных веществ."
     }
 ];
 
-// Глобальные переменные
-let currentQuestionIndex = 0;
-let userScore = 0;
-let userAnswers = [];
+// Данные для фактов
+const facts = [
+    "В Европе использование фосфатов в бытовой химии запрещено с 2013 года, что снизило загрязнение водоемов на 50%!",
+    "Один грамм фосфатов стимулирует рост 5-10 кг водорослей!",
+    "Фосфаты могут накапливаться в организме и вызывать нарушения обмена кальция.",
+    "Детская одежда, постиранная порошком с фосфатами, может вызывать аллергию у 80% детей.",
+    "Натуральные средства для уборки (сода, уксус) дешевле и эффективнее химических аналогов.",
+    "При полоскании фосфаты удаляются только на 40-50%, остальное остается на вещах.",
+    "Производители добавляют фосфаты, потому что это самый дешевый способ смягчения воды.",
+    "В России предельно допустимая концентрация фосфатов выше, чем в Европе в 3-5 раз."
+];
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Сайт загружен');
-    
-    // Инициализация навигации
-    initNavigation();
-    
-    // Инициализация слайдеров
-    initSliders();
-    
-    // Инициализация чеклиста
-    initChecklist();
-    
-    // Инициализация кнопок
-    initButtons();
-    
-    // Инициализация викторины
-    initQuiz();
-    
-    // Плавная прокрутка для навигации
-    initSmoothScroll();
-});
+// Переменные викторины
+let currentQuestion = 0;
+let score = 0;
 
-// Навигация
-function initNavigation() {
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('section');
-    
-    // Наблюдатель за секциями
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.id;
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${id}`) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-        });
-    }, { threshold: 0.3 });
-    
-    sections.forEach(section => observer.observe(section));
-}
-
-// Слайдеры
-function initSliders() {
-    const dangerSlider = document.getElementById('dangerSlider');
-    const rinseSlider = document.getElementById('rinseSlider');
-    const sliderValue = document.getElementById('sliderValue');
-    const rinsePercent = document.getElementById('rinsePercent');
-    
-    if (dangerSlider && sliderValue) {
-        dangerSlider.addEventListener('input', function() {
-            const value = this.value;
-            sliderValue.textContent = `${value}%`;
-            
-            // Меняем цвет текста в зависимости от значения
-            if (value > 70) {
-                sliderValue.style.color = '#c62828';
-            } else if (value > 40) {
-                sliderValue.style.color = '#f57c00';
-            } else {
-                sliderValue.style.color = '#2e7d32';
-            }
-        });
-    }
-    
-    if (rinseSlider && rinsePercent) {
-        rinseSlider.addEventListener('input', function() {
-            const value = this.value;
-            rinsePercent.textContent = `${value}%`;
-            
-            // Анимация изменения
-            rinsePercent.style.transform = 'scale(1.2)';
-            setTimeout(() => {
-                rinsePercent.style.transform = 'scale(1)';
-            }, 200);
-        });
-    }
-}
-
-// Чеклист
-function initChecklist() {
-    const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-    const printBtn = document.getElementById('printBtn');
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const label = this.nextElementSibling;
-            if (this.checked) {
-                label.style.textDecoration = 'line-through';
-                label.style.color = '#2e7d32';
-                label.style.opacity = '0.7';
-            } else {
-                label.style.textDecoration = 'none';
-                label.style.color = '';
-                label.style.opacity = '1';
-            }
-        });
-    });
-    
-    // Кнопка печати
-    if (printBtn) {
-        printBtn.addEventListener('click', function() {
-            const checklistContent = document.querySelector('.checklist-items').cloneNode(true);
-            const checkboxes = checklistContent.querySelectorAll('input');
-            checkboxes.forEach(cb => cb.remove());
-            
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Чек-лист безопасности от фосфатов</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 20px; }
-                            h1 { color: #2e7d32; }
-                            ul { list-style: none; padding: 0; }
-                            li { padding: 10px; border-bottom: 1px solid #eee; }
-                            .checked { text-decoration: line-through; color: #888; }
-                            @media print { button { display: none; } }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Чек-лист безопасности от фосфатов</h1>
-                        <ul>${checklistContent.innerHTML}</ul>
-                        <button onclick="window.print()">🖨️ Печать</button>
-                        <button onclick="window.close()">❌ Закрыть</button>
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-        });
-    }
-}
-
-// Кнопки
-function initButtons() {
-    // Кнопки навигации викторины
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const retryBtn = document.getElementById('retryBtn');
-    
-    if (prevBtn) prevBtn.addEventListener('click', showPrevQuestion);
-    if (nextBtn) nextBtn.addEventListener('click', showNextQuestion);
-    if (retryBtn) retryBtn.addEventListener('click', resetQuiz);
-    
-    // Показать рецепты
-    const recipeLinks = document.querySelectorAll('.alternatives');
-    recipeLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (e.target.tagName === 'I' || e.target.tagName === 'LI') {
-                showRecipesModal();
-            }
-        });
-    });
-    
-    // Закрытие модального окна
-    const closeModalBtn = document.querySelector('.close-modal');
-    const closeBtn = document.querySelector('.close-btn');
-    
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    
-    window.addEventListener('click', function(e) {
-        const modal = document.getElementById('recipesModal');
-        if (e.target === modal) {
-            closeModal();
-        }
+// Функции для плавной прокрутки
+function scrollToSection(sectionId) {
+    document.getElementById(sectionId).scrollIntoView({
+        behavior: 'smooth'
     });
 }
 
 // Викторина
-function initQuiz() {
-    displayQuestion();
+function checkAnswer(button, answer) {
+    const questionData = quizData[currentQuestion];
+    const options = document.querySelectorAll('.quiz-option');
+    const feedback = document.getElementById('quiz-feedback');
+    const nextBtn = document.getElementById('next-question');
+    
+    // Отключаем все кнопки
+    options.forEach(opt => {
+        opt.disabled = true;
+        opt.style.cursor = 'not-allowed';
+    });
+    
+    // Проверяем ответ
+    if (answer === String.fromCharCode(65 + questionData.correct)) {
+        button.classList.add('correct');
+        score++;
+        feedback.innerHTML = `<div style="color: #2ecc71;"><i class="fas fa-check-circle"></i> ${questionData.explanation}</div>`;
+    } else {
+        button.classList.add('wrong');
+        // Показываем правильный ответ
+        options[questionData.correct].classList.add('correct');
+        feedback.innerHTML = `<div style="color: #e74c3c;"><i class="fas fa-times-circle"></i> ${questionData.explanation}</div>`;
+    }
+    
+    // Обновляем счет
+    document.getElementById('score').textContent = score;
+    
+    // Показываем обратную связь и кнопку "Далее"
+    feedback.style.display = 'block';
+    nextBtn.style.display = 'flex';
 }
 
-function displayQuestion() {
-    const questionData = quizQuestions[currentQuestionIndex];
-    const questionElement = document.getElementById('quizQuestion');
-    const optionsContainer = document.getElementById('quizOptions');
-    const progressFill = document.querySelector('.progress-fill');
-    const progressText = document.querySelector('.progress-text');
+function nextQuestion() {
+    currentQuestion++;
     
-    if (!questionData || !questionElement || !optionsContainer) return;
+    if (currentQuestion < quizData.length) {
+        loadQuestion();
+    } else {
+        showQuizResults();
+    }
+}
+
+function loadQuestion() {
+    const questionData = quizData[currentQuestion];
+    const questionElement = document.querySelector('.quiz-question h3');
+    const options = document.querySelectorAll('.quiz-option');
+    const feedback = document.getElementById('quiz-feedback');
+    const nextBtn = document.getElementById('next-question');
     
-    // Обновляем вопрос
+    // Загружаем вопрос
     questionElement.textContent = questionData.question;
     
-    // Обновляем прогресс
-    const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
-    if (progressFill) progressFill.style.width = `${progress}%`;
-    if (progressText) progressText.textContent = `Вопрос ${currentQuestionIndex + 1} из ${quizQuestions.length}`;
-    
-    // Очищаем варианты
-    optionsContainer.innerHTML = '';
-    
-    // Добавляем новые варианты
-    questionData.options.forEach((option, index) => {
-        const optionElement = document.createElement('div');
-        optionElement.className = 'quiz-option';
-        optionElement.textContent = option;
-        
-        // Проверяем, был ли уже выбран этот вариант
-        if (userAnswers[currentQuestionIndex] === index) {
-            optionElement.classList.add('selected');
-        }
-        
-        optionElement.addEventListener('click', () => selectAnswer(index));
-        optionsContainer.appendChild(optionElement);
+    // Загружаем варианты ответов
+    options.forEach((option, index) => {
+        option.textContent = questionData.options[index];
+        option.className = 'quiz-option';
+        option.disabled = false;
+        option.style.cursor = 'pointer';
+        option.onclick = function() {
+            checkAnswer(this, String.fromCharCode(65 + index));
+        };
     });
     
-    // Обновляем кнопки
-    updateNavigationButtons();
+    // Скрываем обратную связь и кнопку "Далее"
+    feedback.style.display = 'none';
+    nextBtn.style.display = 'none';
 }
 
-function selectAnswer(answerIndex) {
-    // Сохраняем ответ
-    userAnswers[currentQuestionIndex] = answerIndex;
+function showQuizResults() {
+    const quizContainer = document.querySelector('.quiz-question');
+    const percentage = (score / quizData.length) * 100;
     
-    // Снимаем выделение со всех вариантов
-    document.querySelectorAll('.quiz-option').forEach(option => {
-        option.classList.remove('selected');
-    });
+    let message = '';
+    let emoji = '';
     
-    // Выделяем выбранный вариант
-    document.querySelectorAll('.quiz-option')[answerIndex].classList.add('selected');
-}
-
-function showNextQuestion() {
-    if (userAnswers[currentQuestionIndex] === undefined) {
-        alert('Пожалуйста, выберите ответ!');
-        return;
-    }
-    
-    if (currentQuestionIndex < quizQuestions.length - 1) {
-        currentQuestionIndex++;
-        displayQuestion();
+    if (percentage === 100) {
+        message = 'Отлично! Ты эксперт по фосфатам! 🎉';
+        emoji = '🏆';
+    } else if (percentage >= 70) {
+        message = 'Хорошо! Ты много знаешь о фосфатах! 👍';
+        emoji = '⭐';
+    } else if (percentage >= 50) {
+        message = 'Неплохо, но есть куда расти! 📚';
+        emoji = '📖';
     } else {
-        showResults();
-    }
-}
-
-function showPrevQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        displayQuestion();
-    }
-}
-
-function updateNavigationButtons() {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    if (prevBtn) {
-        prevBtn.disabled = currentQuestionIndex === 0;
+        message = 'Попробуй еще раз и изучи информацию на сайте! 💪';
+        emoji = '🎯';
     }
     
-    if (nextBtn) {
-        const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
-        nextBtn.innerHTML = isLastQuestion ? 
-            'Завершить <i class="fas fa-check"></i>' : 
-            'Далее <i class="fas fa-arrow-right"></i>';
+    quizContainer.innerHTML = `
+        <h3>Викторина завершена!</h3>
+        <div style="font-size: 4rem; margin: 1rem 0;">${emoji}</div>
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">${message}</p>
+        <p>Твой результат: <strong>${score} из ${quizData.length}</strong></p>
+        <p>Это <strong>${percentage}%</strong> правильных ответов!</p>
+        <button class="quiz-restart" onclick="restartQuiz()" style="margin-top: 2rem;">
+            <i class="fas fa-redo"></i> Пройти еще раз
+        </button>
+    `;
+}
+
+function restartQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    document.getElementById('score').textContent = '0';
+    loadQuestion();
+}
+
+// Факты
+function showRandomFact() {
+    const randomIndex = Math.floor(Math.random() * facts.length);
+    document.getElementById('fact-text').textContent = facts[randomIndex];
+}
+
+// Поделиться проектом
+function shareProject() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Фосфаты: невидимая угроза',
+            text: 'Узнай, как защитить себя и близких от фосфатов!',
+            url: window.location.href
+        });
+    } else {
+        // Альтернатива для браузеров без поддержки Web Share API
+        navigator.clipboard.writeText(window.location.href);
+        alert('Ссылка скопирована в буфер обмена! Поделись ею с друзьями! 📋');
     }
 }
 
-function showResults() {
-    // Считаем правильные ответы
-    userScore = 0;
-    quizQuestions.forEach((question, index) => {
-        if (userAnswers[index] === question.correct) {
-            userScore++;
-        }
+// Анимации при прокрутке
+function initScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Наблюдаем за элементами для анимации
+    document.querySelectorAll('.card, .step, .effect-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(el);
     });
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем первый вопрос викторины
+    loadQuestion();
     
-    // Скрываем вопросы, показываем результаты
-    document.querySelector('.quiz-progress').style.display = 'none';
-    document.querySelector('.quiz-question').style.display = 'none';
-    document.querySelector('.quiz-options').style.display = 'none';
-    document.querySelector('.quiz-controls').style.display = 'none';
+    // Показываем случайный факт
+    showRandomFact();
     
-    const resultsElement = document.getElementById('quizResults');
-    const scoreElement = document.getElementById('score');
-    const messageElement = document.getElementById('resultMessage');
+    // Инициализируем анимации
+    initScrollAnimations();
     
-    if (resultsElement && scoreElement && messageElement) {
-        resultsElement.style.display = 'block';
-        scoreElement.textContent = `${userScore}/${quizQuestions.length}`;
+    // Делаем навигацию активной при прокрутке
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    
+    window.addEventListener('scroll', function() {
+        let current = '';
         
-        // Выбираем сообщение в зависимости от результата
-        let message = '';
-        if (userScore === quizQuestions.length) {
-            message = 'Отлично! Ты настоящий эксперт по фосфатам! 🎯';
-        } else if (userScore >= 3) {
-            message = 'Хорошо! Ты разбираешься в теме! 👍';
-        } else {
-            message = 'Есть куда расти! Изучи материал ещё раз. 📚';
-        }
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (scrollY >= (sectionTop - 200)) {
+                current = section.getAttribute('id');
+            }
+        });
         
-        messageElement.textContent = message;
-    }
-}
-
-function resetQuiz() {
-    currentQuestionIndex = 0;
-    userScore = 0;
-    userAnswers = [];
-    
-    // Показываем вопросы, скрываем результаты
-    document.querySelector('.quiz-progress').style.display = 'block';
-    document.querySelector('.quiz-question').style.display = 'block';
-    document.querySelector('.quiz-options').style.display = 'grid';
-    document.querySelector('.quiz-controls').style.display = 'flex';
-    document.getElementById('quizResults').style.display = 'none';
-    
-    displayQuestion();
-}
-
-// Модальное окно с рецептами
-function showRecipesModal() {
-    const modal = document.getElementById('recipesModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function closeModal() {
-    const modal = document.getElementById('recipesModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-// Плавная прокрутка
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 80,
-                    behavior: 'smooth'
-                });
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === current) {
+                link.classList.add('active');
+                link.style.color = 'var(--primary)';
             }
         });
     });
-}
+});
 
-// Простые звуковые эффекты (опционально)
-function playSound(type) {
-    // В реальном проекте можно добавить звуки
-    console.log(`Воспроизведение звука: ${type}`);
-}
-
-// Экспорт для отладки
-window.app = {
-    currentQuestionIndex,
-    userScore,
-    showNextQuestion,
-    showPrevQuestion,
-    resetQuiz
-};
-
-console.log('Приложение готово!');
+// Добавляем эффект параллакса для герой-секции
+window.addEventListener('scroll', function() {
+    const scrolled = window.pageYOffset;
+    const hero = document.querySelector('.hero');
+    if (hero) {
+        const rate = scrolled * 0.5;
+        hero.style.transform = `translateY(${rate}px)`;
+    }
+});
